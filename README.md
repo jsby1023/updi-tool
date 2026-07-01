@@ -1,4 +1,4 @@
-# ATmega4809 UPDI Programmer
+﻿# ATmega4809 UPDI Programmer
 
 Windows에서 SerialUPDI 방식으로 ATmega4809를 연결하고, 펌웨어와 fuse/lock bit를 관리하는 Tkinter 기반 GUI 도구입니다.
 
@@ -139,7 +139,7 @@ Get-FileHash -Algorithm SHA256 .\firmware.hex
 필수 파일:
 
 ```text
-test.py
+updi_programmer.py
 avrdude.exe
 avrdude.conf
 ```
@@ -147,7 +147,7 @@ avrdude.conf
 실행:
 
 ```powershell
-python .\test.py
+python .\updi_programmer.py
 ```
 
 Python 표준 라이브러리만 사용하며 GUI에는 Tkinter가 필요합니다.
@@ -174,11 +174,23 @@ dist\ATmega4809_UPDI_Programmer.exe
 
 빌드된 exe에는 `avrdude.exe`, `avrdude.conf`, Python 및 Tkinter 런타임이 포함됩니다. Production Profile과 HEX 파일은 제품별 변경이 가능하도록 exe 외부에서 관리합니다.
 
+### PyInstaller 런타임 폴더
+
+단일 exe는 실행할 때 exe 실행 위치에 `_MEI...` 런타임 폴더를 생성합니다. 프로그램은 UI를 표시하기 전에 다음 정리를 수행합니다.
+
+- 현재 실행에 사용하는 `_MEI...` 폴더에 Windows Hidden 속성 적용
+- 현재 실행 폴더는 삭제 대상에서 제외
+- exe 폴더 바로 아래의 `_MEI*`만 검색
+- 1시간 이상 지난 잔여 폴더만 삭제
+- 다른 인스턴스나 보안 프로그램이 사용 중인 폴더는 건너뜀
+
+정상 종료 시 현재 런타임 폴더는 PyInstaller가 자동 삭제합니다. 비정상 종료로 폴더가 남아도 다음 실행에서 1시간이 지난 뒤 자동 정리 대상이 됩니다. Windows 탐색기에서 숨김 항목 표시가 켜져 있으면 Hidden 폴더도 보일 수 있습니다.
+
 ## 저장소 구조
 
 ```text
 updi_tool/
-  test.py                         GUI 및 프로그래밍 로직
+  updi_programmer.py                         GUI 및 프로그래밍 로직
   avrdude.exe                     AVRDUDE 실행파일
   avrdude.conf                    ATmega4809/serialupdi 설정
   production_profile.json         양산 Profile 예제
@@ -220,6 +232,6 @@ updi_tool/
 | Signature mismatch | MCU 모델과 Profile의 `device`, `signature` 확인 |
 | SHA-256 mismatch | HEX를 다시 계산하고 Profile 갱신 |
 | Fuse verify 실패 | 예약 비트, 대상 전원 안정성, Profile 값 검토 |
-| exe 실행 시 임시 폴더 오류 | 쓰기 가능한 폴더에서 exe 실행 |
+| exe 실행 시 임시 폴더 오류 | 쓰기 가능한 폴더에서 exe 실행, 실행 중인 다른 인스턴스 확인 |
 
 더 자세한 절차는 [사용자 매뉴얼](docs/USER_MANUAL.md)의 문제 해결 항목을 참고하십시오.

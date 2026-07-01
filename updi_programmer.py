@@ -1,11 +1,14 @@
 from pathlib import Path
+import ctypes
 import hashlib
 import json
 import queue
 import re
+import shutil
 import subprocess
 import sys
 import threading
+import time
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import winreg
@@ -45,6 +48,42 @@ else:
 APP_DIR = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else BASE_DIR
 AVRDUDE = BASE_DIR / "avrdude.exe"
 AVRDUDE_CONF = BASE_DIR / "avrdude.conf"
+STALE_RUNTIME_AGE_SECONDS = 60 * 60
+
+
+def prepare_runtime_directory():
+    if not getattr(sys, "frozen", False) or sys.platform != "win32":
+        return
+
+    current_runtime = BASE_DIR.resolve()
+    _set_hidden_attribute(current_runtime)
+    stale_before = time.time() - STALE_RUNTIME_AGE_SECONDS
+
+    for folder in APP_DIR.glob("_MEI*"):
+        try:
+            if not folder.is_dir() or folder.resolve() == current_runtime:
+                continue
+            if folder.stat().st_mtime > stale_before:
+                continue
+            shutil.rmtree(folder)
+        except OSError:
+            # Another instance or security software can keep runtime files locked.
+            continue
+
+
+def _set_hidden_attribute(folder):
+    file_attribute_hidden = 0x02
+    invalid_file_attributes = 0xFFFFFFFF
+
+    try:
+        attributes = ctypes.windll.kernel32.GetFileAttributesW(str(folder))
+        if attributes == invalid_file_attributes:
+            return
+        ctypes.windll.kernel32.SetFileAttributesW(
+            str(folder), attributes | file_attribute_hidden
+        )
+    except (AttributeError, OSError):
+        pass
 
 
 class UpdiProgrammerApp(tk.Tk):
@@ -829,5 +868,6 @@ class UpdiProgrammerApp(tk.Tk):
 
 
 if __name__ == "__main__":
+    prepare_runtime_directory()
     app = UpdiProgrammerApp()
     app.mainloop()
