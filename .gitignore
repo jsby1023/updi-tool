@@ -1,0 +1,22 @@
+﻿# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# PyInstaller outputs
+build/
+dist/
+_MEI*/
+*.spec
+
+# Editor settings
+.vscode/
+.idea/
+
+# OS and logs
+Thumbs.db
+Desktop.ini
+*.log

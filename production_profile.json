@@ -1,0 +1,21 @@
+{
+  "profile_name": "900MHz Transmitter Production v1.0",
+  "device": "m4809",
+  "signature": "1e9651",
+  "chip_erase": true,
+  "verify_flash": true,
+  "firmware": {
+    "file": "hw_test.hex",
+    "sha256": "7968cb2b7218d19b695d270b4ee602250a20c1498c60f818c2245e593e1a1bf1"
+  },
+  "fuses": {
+    "fuse0": "0x00",
+    "fuse1": "0x00",
+    "fuse2": "0x02",
+    "fuse5": "0xe4",
+    "fuse6": "0x07",
+    "fuse7": "0x00",
+    "fuse8": "0x00"
+  },
+  "lock": "0xc5"
+}
